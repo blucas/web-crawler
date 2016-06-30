@@ -40,7 +40,7 @@ public class JSoupCrawlerTest {
         final HttpConnection mockConnection = mockPage(baseUrl, document);
 
         final JSoupCrawler crawler = new JSoupCrawler(baseUrl);
-        crawler.crawl(baseUrl);
+        crawler.crawl();
 
         assertEquals(0, crawler.getAnchors().size());
         assertEquals(0, crawler.getMedia().size());
@@ -72,7 +72,7 @@ public class JSoupCrawlerTest {
         final HttpConnection mockConnection = mockPage(baseUrl, document);
 
         final JSoupCrawler crawler = new JSoupCrawler(baseUrl);
-        crawler.crawl(baseUrl);
+        crawler.crawl();
 
         assertEquals(0, crawler.getAnchors().size());
         assertEquals(2, crawler.getMedia().size());
@@ -113,7 +113,7 @@ public class JSoupCrawlerTest {
         final HttpConnection mockConnection2 = mockPage(url2, document);
 
         final JSoupCrawler crawler = new JSoupCrawler(baseUrl);
-        crawler.crawl(baseUrl);
+        crawler.crawl();
 
         assertEquals(2, crawler.getAnchors().size());
         assertEquals(2, crawler.getMedia().size());

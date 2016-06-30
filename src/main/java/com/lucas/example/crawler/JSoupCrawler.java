@@ -7,9 +7,7 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Crawler which crawls the given url and any anchors found which start with the given url.
@@ -20,13 +18,15 @@ public class JSoupCrawler {
 
     private final String baseUrl;
 
-    private final Set<String> visited = new HashSet<>();
+    private final Queue<String> linksToVisit;
 
-    private final Set<String> media = new LinkedHashSet<>();
+    private final Set<String> visited;
 
-    private final Set<String> imports = new LinkedHashSet<>();
+    private final Set<String> media;
 
-    private final Set<String> anchors = new LinkedHashSet<>();
+    private final Set<String> imports;
+
+    private final Set<String> anchors;
 
     public static void main(String... args) throws IOException {
         if (args.length != 1) {
@@ -43,17 +43,37 @@ public class JSoupCrawler {
         }
 
         final JSoupCrawler crawler = new JSoupCrawler(baseUrl);
-        crawler.crawl(baseUrl);
+        crawler.crawl();
 
         crawler.print();
     }
 
     JSoupCrawler(String baseUrl) {
         this.baseUrl = baseUrl;
+
+        visited = new HashSet<>();
+        media = new LinkedHashSet<>();
+        imports = new LinkedHashSet<>();
+        anchors = new LinkedHashSet<>();
+
+        linksToVisit = new LinkedList<>();
+        linksToVisit.add(baseUrl);
     }
 
-    void crawl(String url) {
-        visited.add(url);
+    void crawl() {
+
+        while (!linksToVisit.isEmpty()) {
+            final String url = linksToVisit.remove();
+
+            // Add this URL to the list of visited URLs so that we don't visit it again
+            visited.add(url);
+
+            // Crawl the URL
+            crawl(url);
+        }
+    }
+
+    private void crawl(String url) {
         System.out.printf("Visiting: %s\n", url);
 
         try {
@@ -74,8 +94,13 @@ public class JSoupCrawler {
                 final String absoluteRef = anchor.attr("abs:href");
                 this.anchors.add(absoluteRef);
 
-                if (absoluteRef.startsWith(baseUrl) && !visited.contains(absoluteRef)) {
-                    crawl(absoluteRef);
+                if (absoluteRef.startsWith(baseUrl) && !visited.contains(absoluteRef)
+                        && !linksToVisit.contains(absoluteRef)) {
+                    // Add the link only if it:
+                    // 1 - starts with the baseUrl
+                    // 2 - hasn't been visited
+                    // 3 - hasn't been added to the queue
+                    linksToVisit.add(absoluteRef);
                 }
             }
         } catch (IOException e) {
